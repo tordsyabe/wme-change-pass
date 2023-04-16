@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}WME Change password{% endblock %}
+{% block content %}
+    <p>This is an app for change your WME office 365 password</p>
+    <p>Logon to continue,</p>
+    <form action="#" method="POST">
+        <input type="text" name="email" id="email">
+        <input type="password" name="password" id="password">
+        CAPTCHA COMES HERE
+        <input type="submit" value="Next">
+
+    </form>
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+                <p>{{message}}</p>
+            {% endfor %}
+        {% endif %}
+    {% endwith%}
+{% endblock %}

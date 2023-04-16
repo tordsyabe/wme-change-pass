@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}WME Change password{% endblock %}
+{% block content %}
+    <p>Hi {{user.name}}, please input your new password</p>
+    <ul>
+        <li>Password should be 12 charaters long</li>
+        <li>Must contain letters, numbers and symbols</li>
+    </ul>
+    <form action="#" method="POST">
+        <input type="text" name="newpass" id="newpass">
+        <input type="text" name="confirmpass" id="confirmpass">
+        <input type="submit" value="Confirm">
+
+    </form>
+{% endblock %}

@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}WME Change password{% endblock %}
+{% block content %}
+    <p>welcome to WME Office 365 password management tool.</p>
+    <p><a href="#">Change Authentication Method mobile number</a></p>
+    <p><a href="{{url_for('logon')}}">Change Password</a></p>
+
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+        {% for message in messages %}
+            <p>{{message}}</p>
+        {% endfor %}
+    {% endif %}
+{% endwith%}
+{% endblock %}
