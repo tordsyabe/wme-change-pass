@@ -22,7 +22,6 @@ Session(app)
 
 @app.route("/")
 def index():
-    session.clear()
     return render_template("index.html")
 
 
@@ -45,17 +44,22 @@ def auth():
         #     result = msal_app.acquire_token_silent(scopes=SCOPE,account=account_in_cache[0])
 
         # if not result:
-        result = msal_app.acquire_token_by_username_password(
-            username=email, password=password, scopes=SCOPE)
-        if "access_token" in result:
-            session["access_token"] = result["access_token"]
-            session["password"] = password
-            session["user"] = result.get("id_token_claims")
-            return redirect(url_for("newpass"))
-        else:
-            flash("Invalid username and password")
-            print("Error logging in to graph API")
+        try:
+            result = msal_app.acquire_token_by_username_password(
+                username=email, password=password, scopes=SCOPE)
+            if "access_token" in result:
+                session["access_token"] = result["access_token"]
+                session["password"] = password
+                session["user"] = result.get("id_token_claims")
+                return redirect(url_for("newpass"))
+            else:
+                flash("Invalid username and password")
+                print("Error logging in to graph API")
+                return redirect(url_for("auth"))
+        except ValueError:
+            flash("Invalid username and password/ using public domain")
             return redirect(url_for("auth"))
+
     else:
         if "user" in session:
             return redirect(url_for("newpass"))
@@ -69,7 +73,6 @@ def newpass():
     if request.method == "POST" and form.validate_on_submit():
 
         new_pass = form.new_pass.data
-        comfirm = form.confirm_pass.data
 
         graph_data = requests.post(
             ENDPOINT,
