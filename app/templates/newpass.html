@@ -6,10 +6,21 @@
         <li>Password should be 12 charaters long</li>
         <li>Must contain letters, numbers and symbols</li>
     </ul>
-    <form action="#" method="POST">
-        <input type="text" name="newpass" id="newpass">
-        <input type="text" name="confirmpass" id="confirmpass">
-        <input type="submit" value="Confirm">
+    <form action="" method="POST" novalidate>
+        {{ form.csrf_token }}
+        <p>{{form.new_pass.label}}</p>
+        <p>{{form.new_pass()}}</p>
+        <p>{{form.confirm_pass.label}}</p>
+        <p>{{form.confirm_pass()}}</p>
+        <p><button type="submit">Continue</button></p>
 
     </form>
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+                <p>{{message}}</p>
+            {% endfor %}
+        {% endif %}
+    {% endwith%}
 {% endblock %}

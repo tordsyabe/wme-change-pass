@@ -2,12 +2,19 @@
 {% block title %}WME Change password{% endblock %}
 {% block content %}
     <p>This is an app for change your WME office 365 password</p>
-    <p>Logon to continue,</p>
-    <form action="#" method="POST">
-        <input type="text" name="email" id="email">
-        <input type="password" name="password" id="password">
-        CAPTCHA COMES HERE
-        <input type="submit" value="Next">
+    <p>Sign in to continue,</p>
+    <form action="" method="POST" novalidate>
+        {{ form.csrf_token }}
+        <p>{{form.email.label}}</p>
+        <p>{{form.email()}}</p>
+
+        <p>{{form.password.label}}</p>
+        <p>{{form.password()}}</p>
+        <p>
+            CAPTCHA COMES HERE
+
+        </p>
+        <p><button type="submit">Sign in</button></p>
 
     </form>
 

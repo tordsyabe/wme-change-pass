@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, url_for, redirect, session, f
 from flask_session import Session
 import requests
 import msal
+from .forms import AuthForm, NewPassForm
 
 CLIENT_ID = "c3ef1c35-98fb-40a0-9850-1467a4e33376"
 
@@ -21,14 +22,17 @@ Session(app)
 
 @app.route("/")
 def index():
+    session.clear()
     return render_template("index.html")
 
 
-@app.route("/logon", methods=["GET", "POST"])
-def logon():
-    if request.method == "POST":
-        email = request.form["email"]
-        password = request.form["password"]
+@app.route("/auth", methods=["GET", "POST"])
+def auth():
+    form = AuthForm()
+
+    if request.method == "POST" and form.validate_on_submit():
+        email = form.email.data
+        password = form.password.data
 
         msal_app = msal.ClientApplication(
             client_id=CLIENT_ID, authority=AUTHORITY, client_credential=CLIENT_SECRET
@@ -51,18 +55,22 @@ def logon():
         else:
             flash("Invalid username and password")
             print("Error logging in to graph API")
-            return redirect(url_for("logon"))
+            return redirect(url_for("auth"))
     else:
         if "user" in session:
             return redirect(url_for("newpass"))
-        return render_template("logon.html")
+        return render_template("auth.html", form=form)
 
 
 @app.route("/newpass", methods=["GET", "POST"])
 def newpass():
-    if request.method == "POST":
 
-        new_pass = request.form["newpass"]
+    form = NewPassForm()
+    if request.method == "POST" and form.validate_on_submit():
+
+        new_pass = form.new_pass.data
+        comfirm = form.confirm_pass.data
+
         graph_data = requests.post(
             ENDPOINT,
             json={
@@ -78,9 +86,13 @@ def newpass():
         return redirect(url_for("index"))
 
     else:
+        if form.errors:
+            for errors in form.errors["new_pass"]:
+                flash(errors)
+
         if "user" in session:
 
-            return render_template("newpass.html",  user=session["user"])
+            return render_template("newpass.html",  user=session["user"], form=form)
         return redirect(url_for("index"))
 
 
