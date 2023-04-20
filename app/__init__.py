@@ -12,10 +12,13 @@ AUTHORITY = "https://login.microsoftonline.com/ac2c9531-4944-4cb8-b93b-55801c7b8
 SCOPE = ["User.ReadBasic.All", "Directory.AccessAsUser.All"]
 ENDPOINT = "https://graph.microsoft.com/v1.0/me/changePassword"
 
+
 app = Flask(__name__)
 
 app.config["SESSION_TYPE"] = "filesystem"
 app.secret_key = CLIENT_SECRET
+app.config["RECAPTCHA_PUBLIC_KEY"] = "6LcU_KIlAAAAAA9FPWrCkS5dMet-mNOdJEcaQ8vz"
+app.config["RECAPTCHA_PRIVATE_KEY"] = "6LcU_KIlAAAAAI6pngKFafRXszHZR6Z3T4WHd06l"
 
 Session(app)
 
@@ -61,6 +64,9 @@ def auth():
             return redirect(url_for("auth"))
 
     else:
+        if form.errors:
+            for errors in form.errors["recaptcha"]:
+                flash(errors)
         if "user" in session:
             return redirect(url_for("newpass"))
         return render_template("auth.html", form=form)

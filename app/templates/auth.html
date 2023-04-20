@@ -6,12 +6,12 @@
     <form action="" method="POST" novalidate>
         {{ form.csrf_token }}
         <p>{{form.email.label}}</p>
-        <p>{{form.email()}}</p>
+        <p>{{form.email}}</p>
 
         <p>{{form.password.label}}</p>
-        <p>{{form.password()}}</p>
+        <p>{{form.password}}</p>
         <p>
-            CAPTCHA COMES HERE
+            {{form.recaptcha}}
 
         </p>
         <p><button type="submit">Sign in</button></p>
