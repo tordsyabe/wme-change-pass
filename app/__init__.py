@@ -9,6 +9,7 @@ from reportlab.lib.pagesizes import A4
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image, Table
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
+from reportlab.lib import colors
 import os
 
 CLIENT_ID = "c3ef1c35-98fb-40a0-9850-1467a4e33376"
@@ -72,30 +73,34 @@ def users():
             # document.append(Spacer(1, 20))
             # document.append(Paragraph(
             #     f"Password: {form.user_password.data}", ParagraphStyle(name="name", fontFamily="Helvetica", fontSize=12)))
-
+            first_name = user['givenName']
+            username = f"{first_name[0]}.{user['surname']}"
             data_table = [
-                ["Firstname", "John John"],
-                ["Lastname", "LLAVE"],
-                ["Email Address", "john.llave@jeorginallave.online"],
-                ["Password", "Hs19&1Znk"]
+                ["Firstname", user['givenName']],
+                ["Lastname", user['surname'].upper()],
+                ["username", username.lower()],
+                ["Email Address", user['userPrincipalName']],
+                ["Password", form.user_password.data]
             ]
 
-            table = Table(data_table, colWidths=3*inch, hAlign="LEFT")
+        style = [
+            ('GRID', (0, 0), (-1, -1), 1, colors.black)]
+        table = Table(data_table,  colWidths=3*inch, hAlign="LEFT")
 
-            document.append(table)
+        document.append(table)
 
-            pdf_location = fn = os.path.join(os.path.dirname(os.path.abspath(
-                __file__)), 'static/pdf/')
-            SimpleDocTemplate(f"{pdf_location}{user['displayName']}.pdf", pagesize=A4,
-                              rightMargin=0.5*inch, leftMargin=0.5*inch, bottomMargin=0.5*inch, topMargin=0.5*inch).build(document)
-            flash(
-                f"User details for {user['displayName']} was generated", "info")
-            return send_file(f"{pdf_location}{user['displayName']}.pdf", as_attachment=True)
+        pdf_location = fn = os.path.join(os.path.dirname(os.path.abspath(
+            __file__)), 'static/pdf/')
+        SimpleDocTemplate(f"{pdf_location}{user['displayName']}.pdf", pagesize=A4,
+                          rightMargin=0.5*inch, leftMargin=0.5*inch, bottomMargin=0.5*inch, topMargin=0.5*inch).build(document)
+        flash(
+            f"User details for {user['displayName']} was generated", "info")
+        return send_file(f"{pdf_location}{user['displayName']}.pdf", as_attachment=True)
 
     return render_template('userdetails.html', form=form)
 
 
-@app.route("/auth", methods=["GET", "POST"])
+@ app.route("/auth", methods=["GET", "POST"])
 def auth():
     form = AuthForm()
 
@@ -139,7 +144,7 @@ def auth():
         return render_template("auth.html", form=form)
 
 
-@app.route("/newpass", methods=["GET", "POST"])
+@ app.route("/newpass", methods=["GET", "POST"])
 def newpass():
 
     form = NewPassForm()
