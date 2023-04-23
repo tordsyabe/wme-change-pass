@@ -1,28 +1,30 @@
-{% extends "base.html" %}
-{% block title %}WME Change password{% endblock %}
-{% block content %}
-    <p>This is an app for change your WME office 365 password</p>
-    <p>Sign in to continue,</p>
-    <form action="" method="POST" novalidate>
-        {{ form.csrf_token }}
-        <p>{{form.email.label}}</p>
-        <p>{{form.email}}</p>
+{% extends "base.html" %} {% block title %}WME Change password{% endblock %} {%
+block content %}
+<div>
+  <h5 class="mb-5">This is an app for change your WME office 365 password</h5>
+  <h6 class="mb-5">Sign in to continue</h6>
+  <form action="" method="POST" novalidate>
+    {{ form.csrf_token }}
+    <div class="form-outline mb-3">
+      {{form.email(class_="form-control form-control-lg")}}
+      {{form.email.label(class_="form-label")}}
+    </div>
 
-        <p>{{form.password.label}}</p>
-        <p>{{form.password}}</p>
-        <p>
-            {{form.recaptcha}}
+    <div class="form-outline mb-3">
+      {{form.password(class_="form-control form-control-lg")}}
+      {{form.password.label(class_="form-label")}}
+    </div>
 
-        </p>
-        <p><button type="submit">Sign in</button></p>
+    <div class="mb-3">{{form.recaptcha}}</div>
+    <div class="mb-3">
+      <button type="submit" class="btn btn-primary">Sign in</button>
+    </div>
+  </form>
 
-    </form>
+  {% with messages = get_flashed_messages() %} {% if messages %} {% for message
+  in messages %}
+  <div class="alert alert-danger mt-3" role="alert">{{message}}</div>
+  {% endfor %} {% endif %} {% endwith%}
+</div>
 
-    {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            {% for message in messages %}
-                <p>{{message}}</p>
-            {% endfor %}
-        {% endif %}
-    {% endwith%}
 {% endblock %}

@@ -1,0 +1,30 @@
+{% extends "base.html" %} {% block title %}WME Change password{% endblock %} {%
+block content %}
+<div>
+  <h5 class="mb-5">Please input email address and password to print</h5>
+  <form action="" method="POST" novalidate>
+    {{ form.csrf_token }}
+    <div class="form-outline mb-3">
+      {{form.user_email(class_="form-control form-control-lg")}}
+      {{form.user_email.label(class_="form-label")}}
+    </div>
+
+    <div class="form-outline mb-3">
+      {{form.user_password(class_="form-control form-control-lg")}}
+      {{form.user_password.label(class_="form-label")}}
+    </div>
+
+      <button type="submit" class="btn btn-primary">Generate</button>
+    </div>
+  </form>
+
+  {% with messages = get_flashed_messages(with_categories=True) %} 
+    {% if messages %} 
+        {% for category, message in messages %}
+            <div class="alert alert-{{category}} mt-3" role="alert">{{message}}</div>
+        {% endfor %} 
+    {% endif %}
+  {% endwith%}
+</div>
+
+{% endblock %}

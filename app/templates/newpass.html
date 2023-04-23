@@ -1,26 +1,32 @@
-{% extends "base.html" %}
-{% block title %}WME Change password{% endblock %}
-{% block content %}
-    <p>Hi {{user.name}}, please input your new password</p>
-    <ul>
-        <li>Password should be 12 charaters long</li>
-        <li>Must contain letters, numbers and symbols</li>
-    </ul>
-    <form action="" method="POST" novalidate>
-        {{ form.csrf_token }}
-        <p>{{form.new_pass.label}}</p>
-        <p>{{form.new_pass()}}</p>
-        <p>{{form.confirm_pass.label}}</p>
-        <p>{{form.confirm_pass()}}</p>
-        <p><button type="submit">Continue</button></p>
+{% extends "base.html" %} {% block title %}WME Change password{% endblock %} {%
+block content %}
+<h6 class="mb-4">
+  Hi <strong>{{user.name}}</strong>, please input your new password
+</h6>
+<div class="alert alert-info mb-4" role="alert">
+  <ul>
+    <li>Password should be 12 charaters long</li>
+    <li>Must contain letters, numbers and symbols</li>
+  </ul>
+</div>
 
-    </form>
+<form action="" method="POST" novalidate>
+  {{ form.csrf_token }}
+  <div class="form-outline mb-3">
+    {{form.new_pass(class_="form-control form-control-lg")}}
+    {{form.new_pass.label(class_="form-label")}}
+  </div>
+  <div class="form-outline mb-3">
+    {{form.confirm_pass(class_="form-control form-control-lg")}}
+    {{form.confirm_pass.label(class_="form-label")}}
+  </div>
 
-    {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            {% for message in messages %}
-                <p>{{message}}</p>
-            {% endfor %}
-        {% endif %}
-    {% endwith%}
-{% endblock %}
+  <div class="mb-3">
+    <button type="submit" class="btn btn-primary">Continue</button>
+  </div>
+</form>
+
+{% with messages = get_flashed_messages() %} {% if messages %} {% for message in
+messages %}
+<div class="alert alert-danger mt-3" role="alert">{{message}}</div>
+{% endfor %} {% endif %} {% endwith%} {% endblock %}

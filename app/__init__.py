@@ -1,8 +1,15 @@
-from flask import Flask, render_template, request, url_for, redirect, session, flash
+from flask import Flask, render_template, request, url_for, redirect, session, flash, send_file
 from flask_session import Session
 import requests
 import msal
-from .forms import AuthForm, NewPassForm
+from .forms import AuthForm, NewPassForm, UserDetailForm
+
+from reportlab.lib.enums import TA_JUSTIFY, TA_CENTER
+from reportlab.lib.pagesizes import A4
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image, Table
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import inch
+import os
 
 CLIENT_ID = "c3ef1c35-98fb-40a0-9850-1467a4e33376"
 
@@ -10,7 +17,8 @@ CLIENT_SECRET = "xyE8Q~1tLAzua6-SIw.zyLAPdZURkgbCVspP8aIM"
 
 AUTHORITY = "https://login.microsoftonline.com/ac2c9531-4944-4cb8-b93b-55801c7b8338"
 SCOPE = ["User.ReadBasic.All", "Directory.AccessAsUser.All"]
-ENDPOINT = "https://graph.microsoft.com/v1.0/me/changePassword"
+ENDPOINT_PASS = "https://graph.microsoft.com/v1.0/me/changePassword"
+ENDPOINT_USERS = "https://graph.microsoft.com/v1.0/users"
 
 
 app = Flask(__name__)
@@ -26,6 +34,65 @@ Session(app)
 @app.route("/")
 def index():
     return render_template("index.html")
+
+
+@app.route("/users", methods=["GET", "POST"])
+def users():
+
+    form = UserDetailForm()
+    if request.method == "POST" and form.validate_on_submit():
+
+        graph_data = requests.get(  # Use token to call downstream service
+            f"{ENDPOINT_USERS}/{form.user_email.data}",
+            headers={'Authorization': 'Bearer ' + session["access_token"]},
+        )
+
+        user = graph_data.json()
+        print(graph_data)
+        print(user)
+        if "error" in graph_data.json():
+            flash(graph_data.json()["error"]["message"], "danger")
+            return redirect(url_for('users'))
+        else:
+            document = []
+            fn = os.path.join(os.path.dirname(os.path.abspath(
+                __file__)), 'static/assets/wme-logo.png')
+
+            document.append(Image(filename=fn, width=1.5*inch,
+                            height=1*inch, hAlign="LEFT"))
+            document.append(Spacer(1, 40))
+            # document.append(Paragraph(
+            #     f"First Name: {user['givenName']}", ParagraphStyle(name="name", fontFamily="Helvetica", fontSize=12)))
+            # document.append(Spacer(1, 20))
+            # document.append(Paragraph(
+            #     f"Last Name: {user['surname'].upper()}", ParagraphStyle(name="name", fontFamily="Helvetica", fontSize=12)))
+            # document.append(Spacer(1, 20))
+            # document.append(Paragraph(
+            #     f"Email Address: {user['userPrincipalName']}", ParagraphStyle(name="name", fontFamily="Helvetica", fontSize=12)))
+            # document.append(Spacer(1, 20))
+            # document.append(Paragraph(
+            #     f"Password: {form.user_password.data}", ParagraphStyle(name="name", fontFamily="Helvetica", fontSize=12)))
+
+            data_table = [
+                ["Firstname", "John John"],
+                ["Lastname", "LLAVE"],
+                ["Email Address", "john.llave@jeorginallave.online"],
+                ["Password", "Hs19&1Znk"]
+            ]
+
+            table = Table(data_table, colWidths=3*inch, hAlign="LEFT")
+
+            document.append(table)
+
+            pdf_location = fn = os.path.join(os.path.dirname(os.path.abspath(
+                __file__)), 'static/pdf/')
+            SimpleDocTemplate(f"{pdf_location}{user['displayName']}.pdf", pagesize=A4,
+                              rightMargin=0.5*inch, leftMargin=0.5*inch, bottomMargin=0.5*inch, topMargin=0.5*inch).build(document)
+            flash(
+                f"User details for {user['displayName']} was generated", "info")
+            return send_file(f"{pdf_location}{user['displayName']}.pdf", as_attachment=True)
+
+    return render_template('userdetails.html', form=form)
 
 
 @app.route("/auth", methods=["GET", "POST"])
@@ -81,7 +148,7 @@ def newpass():
         new_pass = form.new_pass.data
 
         graph_data = requests.post(
-            ENDPOINT,
+            ENDPOINT_PASS,
             json={
                 "currentPassword": session["password"], "newPassword": new_pass},
             headers={'Authorization': 'Bearer ' + session["access_token"], 'Content-Type': 'application/json'})
