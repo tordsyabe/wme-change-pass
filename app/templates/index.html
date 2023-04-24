@@ -2,10 +2,10 @@
 block content %}
 <h5 class="mb-5">Welcome to WME Office 365 password management tool.</h5>
 <p><a href="#">Change Authentication Method mobile number</a></p>
-<p><a href="{{url_for('auth')}}">Change Password</a></p>
+<p><a href="{{url_for('changepass')}}">Change Password</a></p>
 <p><a href="{{url_for('users')}}">Print User Details</a></p>
 
-{% with messages = get_flashed_messages() %} {% if messages %} {% for message in
-messages %}
-<p>{{message}}</p>
-{% endfor %} {% endif %} {% endwith%} {% endblock %}
+{% with messages = get_flashed_messages(with_categories=True) %} {% if messages
+%} {% for category, message in messages %}
+<div class="alert alert-{{category}} mt-3" role="alert">{{message}}</div>
+{% endfor %} {% endif %} {% endwith%}{% endblock %}

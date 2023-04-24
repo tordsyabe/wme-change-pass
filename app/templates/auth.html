@@ -5,6 +5,11 @@ block content %}
   <h6 class="mb-5">Sign in to continue</h6>
   <form action="" method="POST" novalidate>
     {{ form.csrf_token }}
+    <input
+      type="hidden"
+      name="redirect"
+      value="{{request.args.get('redirect','')}}"
+    />
     <div class="form-outline mb-3">
       {{form.email(class_="form-control form-control-lg")}}
       {{form.email.label(class_="form-label")}}

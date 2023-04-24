@@ -2,7 +2,8 @@ from flask import Flask, render_template, request, url_for, redirect, session, f
 from flask_session import Session
 import requests
 import msal
-from .forms import AuthForm, NewPassForm, UserDetailForm
+from .forms import AuthForm, ChangePassForm, UserDetailForm
+from app.decorators import login_required
 
 from reportlab.lib.enums import TA_JUSTIFY, TA_CENTER
 from reportlab.lib.pagesizes import A4
@@ -37,7 +38,56 @@ def index():
     return render_template("index.html")
 
 
+@app.route("/auth", methods=["GET", "POST"])
+def auth():
+    form = AuthForm()
+
+    if request.method == "POST" and form.validate_on_submit():
+        email = form.email.data
+        password = form.password.data
+        redirect_page = request.form.get('redirect')
+
+        msal_app = msal.ClientApplication(
+            client_id=CLIENT_ID, authority=AUTHORITY, client_credential=CLIENT_SECRET
+        )
+
+        result = None
+        # account_in_cache = msal_app.get_accounts(username=email)
+
+        # if account_in_cache:
+        #     result = msal_app.acquire_token_silent(scopes=SCOPE,account=account_in_cache[0])
+
+        # if not result:
+        try:
+            result = msal_app.acquire_token_by_username_password(
+                username=email, password=password, scopes=SCOPE)
+            if "access_token" in result:
+                session["access_token"] = result["access_token"]
+                session["password"] = password
+                session["user"] = result.get("id_token_claims")
+
+                if redirect_page:
+                    return redirect(redirect_page)
+                return redirect(url_for("index"))
+            else:
+                flash("Invalid username and password", "danger")
+                print("Error logging in to graph API")
+                return redirect(url_for("auth"))
+        except ValueError:
+            flash("Invalid username and password/ using public domain", "danger")
+            return redirect(url_for("auth"))
+
+    else:
+        if form.errors:
+            for errors in form.errors["recaptcha"]:
+                flash(errors)
+        if "user" in session:
+            return redirect(url_for("index"))
+        return render_template("auth.html", form=form)
+
+
 @app.route("/users", methods=["GET", "POST"])
+@login_required
 def users():
 
     form = UserDetailForm()
@@ -62,23 +112,13 @@ def users():
             document.append(Image(filename=fn, width=1.5*inch,
                             height=1*inch, hAlign="LEFT"))
             document.append(Spacer(1, 40))
-            # document.append(Paragraph(
-            #     f"First Name: {user['givenName']}", ParagraphStyle(name="name", fontFamily="Helvetica", fontSize=12)))
-            # document.append(Spacer(1, 20))
-            # document.append(Paragraph(
-            #     f"Last Name: {user['surname'].upper()}", ParagraphStyle(name="name", fontFamily="Helvetica", fontSize=12)))
-            # document.append(Spacer(1, 20))
-            # document.append(Paragraph(
-            #     f"Email Address: {user['userPrincipalName']}", ParagraphStyle(name="name", fontFamily="Helvetica", fontSize=12)))
-            # document.append(Spacer(1, 20))
-            # document.append(Paragraph(
-            #     f"Password: {form.user_password.data}", ParagraphStyle(name="name", fontFamily="Helvetica", fontSize=12)))
+
             first_name = user['givenName']
             username = f"{first_name[0]}.{user['surname']}"
             data_table = [
                 ["Firstname", user['givenName']],
                 ["Lastname", user['surname'].upper()],
-                ["username", username.lower()],
+                ["username", form.username.data],
                 ["Email Address", user['userPrincipalName']],
                 ["Password", form.user_password.data]
             ]
@@ -94,60 +134,17 @@ def users():
         SimpleDocTemplate(f"{pdf_location}{user['displayName']}.pdf", pagesize=A4,
                           rightMargin=0.5*inch, leftMargin=0.5*inch, bottomMargin=0.5*inch, topMargin=0.5*inch).build(document)
         flash(
-            f"User details for {user['displayName']} was generated", "info")
+            f"User details for {user['displayName']} was generated", "success")
         return send_file(f"{pdf_location}{user['displayName']}.pdf", as_attachment=True)
 
     return render_template('userdetails.html', form=form)
 
 
-@ app.route("/auth", methods=["GET", "POST"])
-def auth():
-    form = AuthForm()
+@app.route("/changepass", methods=["GET", "POST"])
+@login_required
+def changepass():
 
-    if request.method == "POST" and form.validate_on_submit():
-        email = form.email.data
-        password = form.password.data
-
-        msal_app = msal.ClientApplication(
-            client_id=CLIENT_ID, authority=AUTHORITY, client_credential=CLIENT_SECRET
-        )
-
-        result = None
-        # account_in_cache = msal_app.get_accounts(username=email)
-
-        # if account_in_cache:
-        #     result = msal_app.acquire_token_silent(scopes=SCOPE,account=account_in_cache[0])
-
-        # if not result:
-        try:
-            result = msal_app.acquire_token_by_username_password(
-                username=email, password=password, scopes=SCOPE)
-            if "access_token" in result:
-                session["access_token"] = result["access_token"]
-                session["password"] = password
-                session["user"] = result.get("id_token_claims")
-                return redirect(url_for("newpass"))
-            else:
-                flash("Invalid username and password")
-                print("Error logging in to graph API")
-                return redirect(url_for("auth"))
-        except ValueError:
-            flash("Invalid username and password/ using public domain")
-            return redirect(url_for("auth"))
-
-    else:
-        if form.errors:
-            for errors in form.errors["recaptcha"]:
-                flash(errors)
-        if "user" in session:
-            return redirect(url_for("newpass"))
-        return render_template("auth.html", form=form)
-
-
-@ app.route("/newpass", methods=["GET", "POST"])
-def newpass():
-
-    form = NewPassForm()
+    form = ChangePassForm()
     if request.method == "POST" and form.validate_on_submit():
 
         new_pass = form.new_pass.data
@@ -160,21 +157,17 @@ def newpass():
         print(graph_data)
         if graph_data.status_code == 204:
             session.clear()
-            flash("You have successfully changed your password")
+            flash("You have successfully changed your password", "success")
         else:
             session.clear()
-            flash("Something went wrong please try again")
+            flash(flash(graph_data.json()["error"]["message"], "danger"))
         return redirect(url_for("index"))
 
-    else:
-        if form.errors:
-            for errors in form.errors["new_pass"]:
-                flash(errors)
+    if form.errors:
+        for errors in form.errors["new_pass"]:
+            flash(errors, "danger")
 
-        if "user" in session:
-
-            return render_template("newpass.html",  user=session["user"], form=form)
-        return redirect(url_for("index"))
+    return render_template("changepass.html",  user=session["user"], form=form)
 
 
 if __name__ == "__main__":

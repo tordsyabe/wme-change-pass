@@ -28,23 +28,11 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.2.0/mdb.min.css"
       rel="stylesheet"
     /> -->
-    <style>
-      html {
-        height: 100%;
-      }
-      .side-bg {
-        background-image: url("https://images.unsplash.com/photo-1681216868987-b7268753b81c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=735&q=80");
-        background-position: center;
-        background-repeat: no-repeat;
-        background-size: cover;
-      }
-    </style>
   </head>
   <body>
     <main class="container-fluid min-vh-100 d-flex flex-column">
       <div class="row">
-        <div class="col p-5">{% block content%} {% endblock %}</div>
-        <div class="col side-bg"></div>
+        <div class="col-6 offset-3 p-5">{% block content%} {% endblock %}</div>
       </div>
     </main>
     <!-- MDB -->

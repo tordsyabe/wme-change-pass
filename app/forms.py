@@ -10,7 +10,7 @@ class AuthForm(FlaskForm):
     recaptcha = RecaptchaField()
 
 
-class NewPassForm(FlaskForm):
+class ChangePassForm(FlaskForm):
 
     new_pass = PasswordField("Password", [InputRequired(message="Password field is required"), EqualTo(
         "confirm_pass", message='Passwords must match'), Length(12, message="Password must be more than 12 characters"), Regexp("^(?=.*?[A-Z])(?=(.*[a-z]){1,})(?=(.*[\d]){1,})(?=(.*[\W]){1,})(?!.*\s).{12,}$", message="Password must combination of letters, symbols and numbers")])
@@ -20,5 +20,6 @@ class NewPassForm(FlaskForm):
 
 class UserDetailForm(FlaskForm):
 
-    user_email = EmailField("User's Email", [InputRequired()])
-    user_password = StringField("User's Password", [InputRequired()])
+    user_email = EmailField("Email", [InputRequired()])
+    username = StringField("Username", [InputRequired()])
+    user_password = StringField("Password", [InputRequired()])
