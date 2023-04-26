@@ -21,5 +21,4 @@ class ChangePassForm(FlaskForm):
 class UserDetailForm(FlaskForm):
 
     user_email = EmailField("Email", [InputRequired()])
-    username = StringField("Username", [InputRequired()])
     user_password = StringField("Password", [InputRequired()])

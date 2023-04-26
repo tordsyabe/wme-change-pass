@@ -1,0 +1,40 @@
+{
+  "entries": [
+    {
+      "attributes": {
+        "accountExpires": "9999-12-31 23:59:59.999999+00:00",
+        "badPasswordTime": "1601-01-01 00:00:00+00:00",
+        "badPwdCount": 0,
+        "cn": "Jessa Descotido",
+        "codePage": 0,
+        "company": "WME Engineering Consultants",
+        "countryCode": 0,
+        "dSCorePropagationData": ["1601-01-01 00:00:00+00:00"],
+        "displayName": "Jessa Descotido",
+        "distinguishedName": "CN=Jessa Descotido,OU=Business Support,OU=Users,OU=WME UAE,DC=jorgie,DC=local",
+        "givenName": "Jessa",
+        "instanceType": 4,
+        "lastLogoff": "1601-01-01 00:00:00+00:00",
+        "lastLogon": "1601-01-01 00:00:00+00:00",
+        "logonCount": 0,
+        "mail": "jessa@jeorginallave.online",
+        "mobile": "+971508260126",
+        "name": "Jessa Descotido",
+        "objectCategory": "CN=Person,CN=Schema,CN=Configuration,DC=jorgie,DC=local",
+        "objectClass": ["top", "person", "organizationalPerson", "user"],
+        "objectGUID": "{9f81aa25-058e-42d0-86af-7ff7416c724f}",
+        "objectSid": "S-1-5-21-948422156-1739597991-2252970455-1104",
+        "primaryGroupID": 513,
+        "pwdLastSet": "2023-04-26 17:25:09.611858+00:00",
+        "sAMAccountName": "j.descotido",
+        "sAMAccountType": 805306368,
+        "sn": "Descotido",
+        "title": "Nurse",
+        "uSNChanged": 12745,
+        "userPrincipalName": "j.descotido@jorgie.local",
+        "whenChanged": "2023-04-26 17:25:53+00:00"
+      },
+      "dn": "CN=Jessa Descotido,OU=Business Support,OU=Users,OU=WME UAE,DC=jorgie,DC=local"
+    }
+  ]
+}
