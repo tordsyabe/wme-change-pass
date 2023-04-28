@@ -102,20 +102,24 @@ def users():
         #     headers={'Authorization': 'Bearer ' + session["access_token"]},
         # )
 
-        server = Server('192.168.0.153', get_info=ALL)
+        server = Server('192.168.0.154', get_info=ALL)
         conn = Connection(server, user="jorgie\\administrator",
                           password="Wme.ae123", auto_bind=True)
 
         conn.search('dc=jorgie,dc=local',
                     f'(mail={form.user_email.data})', attributes=ALL_ATTRIBUTES)
         result = json.loads(conn.response_to_json())
-        print(result["entries"][0]["attributes"]["displayName"])
+
+        if len(result["entries"]) == 0:
+            flash(f"User account details does not exists - {form.user_email.data}", "danger")
+            return redirect(url_for("users"))
 
         first_name = result["entries"][0]["attributes"]["givenName"]
         last_name = result["entries"][0]["attributes"]["sn"]
         full_name = result["entries"][0]["attributes"]["displayName"]
-        email = result["entries"][0]["attributes"]["mail"]
+        wme_email = result["entries"][0]["attributes"]["mail"]
         username = result["entries"][0]["attributes"]["sAMAccountName"]
+        egis_email = wme_email.split("@")[0] + "@egis-group.com"
 
         # if "error" in graph_data.json():
         #     flash(graph_data.json()["error"]["message"], "danger")
@@ -126,38 +130,39 @@ def users():
             __file__)), 'static/assets/wme-logo.png')
 
         data_table_account = [
-            ["USER DETAILS"],
+            [Paragraph("<b><font color='#616161'>USER DETAIL</font></b>")],
             ["EMPLOYEE ID", ""],
             ["EMPLOYEE NAME", f"{last_name.upper()} {first_name}"],
-            ["EMAIL ADDRESS", email],
+            ["WME EMAIL", wme_email],
+            ["EGIS EMAIL", egis_email],
             ["PASSWORD", form.user_password.data],
             ["USERNAME/ PC LOGIN", username],
         ]
 
         data_table_links = [
-            ["USEFUL LINKS"],
-            [Paragraph("WEBMAIL URL", style=ParagraphStyle(name="align_center",
-                                                           hAlign=TA_CENTER)), "https://outlook.office.com/mail/"],
+            [Paragraph("<b><font color='#616161'>USEFUL LINKS</font></b>")],
+            ["WEBMAIL", "https://outlook.office.com/mail"],
             ["EGIS INTRANET", "https://myegis.egis.fr"],
             ["WEB TIMESHEET URL", "https://suivi-activite.egis.fr/eTime/#/Home"],
             ["EGIS EXTRANET URL (FOR VPN)", "https://extranet.egis.fr"],
             ["SERVICENOW IT HELPDESK", "https://egisgroup.service-now.com"],
+            ["WME IT HELPDESK", "https://helpdesk.wmeglobal.com"],
             ["PASSWORD CHANGE URL", "https://mypassword.egis.fr"]
 
         ]
 
         data_table_notes = [
-            [Paragraph("PROTECTING PASSWORDS")],
-            [Paragraph(" - Users may never share their passwords with anyone else in the company, inlcuding co-workers, managers, administrative assistants, IT staff members, etc.")],
-            [Paragraph(" - Users may never share their passwords with any outside parties, including those claiming to be representatives of business partner with a legitimate need to access a system.")],
-            [Paragraph(
-                " - Users must refarin from writing passwords down and keeping them at their workstations.")],
-            [Paragraph(
-                " - Users may not use password manages or other tools to help store and remember passwords without IT's permission.")]
+            [Paragraph("<b><font color='#616161'>PROTECTING PASSWORDS</font></b>")],
+            [Paragraph("<font color='#616161'><bullet>&bull;</bullet>Users may never share their passwords with anyone else in the company, inlcuding co-workers, managers, administrative assistants, IT staff members, etc.</font>")],
+            [Paragraph("<font color='#616161'><bullet>&bull;</bullet>Users may never share their passwords with any outside parties, including those claiming to be representatives of business partner with a legitimate need to access a system.</font>")],
+            [Paragraph("<font color='#616161'><bullet>&bull;</bullet>Users must refrain from writing passwords down and keeping them at their workstations.</font>")],
+            [Paragraph("<font color='#616161'><bullet>&bull;</bullet>Users may not use password manages or other tools to help store and remember passwords without IT's permission.</font>")]
         ]
 
         style_account = TableStyle([
+            ('TEXTCOLOR', (0, 1), (-1, -1), '#424242'),
             ('GRID', (1, 1), (-1, -1), 0.5, colors.lightgrey),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
             ('BACKGROUND', (0, 0), (-1, 0), "#e0e0e0"),
             ('BACKGROUND', (0, 1), (0, -1), "#eeeeee")])
         table_account = Table(data_table_account,  colWidths=(2.5*inch, 4.5*inch),
@@ -167,14 +172,18 @@ def users():
         table_links = Table(data_table_links,  colWidths=(2.5*inch, 4.5*inch),
                             rowHeights=0.4*inch, hAlign="LEFT", vAlign="MIDDLE")
         style_links = TableStyle([
+            ('TEXTCOLOR', (0, 1), (-1, -1), '#424242'),
             ('GRID', (1, 1), (-1, -1), 0.5, colors.lightgrey),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
             ('BACKGROUND', (0, 0), (-1, 0), "#e0e0e0"),
             ('BACKGROUND', (0, 1), (0, -1), "#eeeeee")])
         table_links.setStyle(style_links)
 
-        table_notes = Table(data_table_notes, rowHeights=0.4 *
-                            inch, colWidths=7*inch, hAlign="LEFT", vAlign="MIDDLE")
+        table_notes = Table(data_table_notes, rowHeights=[
+                            0.4*inch, 0.5*inch, 0.5*inch, 0.5*inch, 0.5*inch], colWidths=7*inch, hAlign="LEFT", vAlign="MIDDLE")
         style_notes = TableStyle([
+            ('TEXTCOLOR', (0, 1), (-1, -1), '#424242'),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
             ('BACKGROUND', (0, 0), (-1, 0), "#e0e0e0"),
             ('BACKGROUND', (0, 1), (0, -1), "#eeeeee")])
         table_notes.setStyle(style_notes)
@@ -182,20 +191,20 @@ def users():
         document.append(Image(filename=fn, width=1.2*inch,
                               height=0.8*inch, hAlign="LEFT"))
         document.append(Spacer(1, 10))
-        document.append(Paragraph("WME USER ACCOUNT DETAILS"))
-        document.append(Spacer(1, 30))
+        document.append(
+            Paragraph("<b><font color='#616161'>WME USER ACCOUNT DETAILS</font></b>"))
+        document.append(Spacer(1, 20))
         document.append(table_account)
-        document.append(Spacer(1, 30))
+        document.append(Spacer(1, 20))
         document.append(table_links)
-        document.append(Spacer(1, 30))
+        document.append(Spacer(1, 20))
         document.append(table_notes)
 
         pdf_location = fn = os.path.join(os.path.dirname(os.path.abspath(
             __file__)), 'static/pdf/')
-        SimpleDocTemplate(f"{pdf_location}{full_name}.pdf", pagesize=A4,
-                          rightMargin=0.5*inch, leftMargin=0.5*inch, bottomMargin=0.8*inch, topMargin=0.8*inch).build(document)
-        flash(
-            f"User details for {full_name} was generated", "success")
+        SimpleDocTemplate(f"{pdf_location}{full_name}.pdf", title=f"{full_name} Account Details", pagesize=A4,
+                          rightMargin=0.5*inch, leftMargin=0.5*inch, bottomMargin=0.5*inch, topMargin=0.5*inch).build(document)
+        # flash(f"User details for {full_name} was generated", "success")
         return send_file(f"{pdf_location}{full_name}.pdf", as_attachment=True)
 
     return render_template('userdetails.html', form=form)
