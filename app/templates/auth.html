@@ -22,13 +22,14 @@ block content %}
 
     <div class="mb-3">{{form.recaptcha}}</div>
     <div class="mb-3">
+      <a href="{{url_for('index')}}" class="btn btn-dark">Cancel</a>
       <button type="submit" class="btn btn-primary">Sign in</button>
     </div>
   </form>
 
   {% with messages = get_flashed_messages() %} {% if messages %} {% for message
   in messages %}
-  <div class="alert alert-danger mt-3" role="alert">{{message}}</div>
+  <div class="alert alert-{{category}} mt-3" role="alert">{{message}}</div>
   {% endfor %} {% endif %} {% endwith%}
 </div>
 

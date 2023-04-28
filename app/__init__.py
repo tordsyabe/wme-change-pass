@@ -84,8 +84,8 @@ def auth():
 
     else:
         if form.errors:
-            for errors in form.errors["recaptcha"]:
-                flash(errors)
+            for error in form.errors:
+                flash(form.errors[error][0], "danger")
         if "user" in session:
             return redirect(url_for("index"))
         return render_template("auth.html", form=form)
@@ -206,7 +206,9 @@ def users():
                           rightMargin=0.5*inch, leftMargin=0.5*inch, bottomMargin=0.5*inch, topMargin=0.5*inch).build(document)
         # flash(f"User details for {full_name} was generated", "success")
         return send_file(f"{pdf_location}{full_name}.pdf", as_attachment=True)
-
+    if form.errors:
+        for error in form.errors:
+            flash(form.errors[error][0], "danger")
     return render_template('userdetails.html', form=form)
 
 

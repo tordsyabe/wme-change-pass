@@ -5,8 +5,8 @@ from wtforms.validators import InputRequired, EqualTo, Length, Regexp
 
 class AuthForm(FlaskForm):
 
-    email = EmailField("Email", [InputRequired()])
-    password = PasswordField("Password", [InputRequired()])
+    email = EmailField("Email", [InputRequired(message="Email field is required")])
+    password = PasswordField("Password", [InputRequired(message="Password field is required")])
     recaptcha = RecaptchaField()
 
 
@@ -20,5 +20,5 @@ class ChangePassForm(FlaskForm):
 
 class UserDetailForm(FlaskForm):
 
-    user_email = EmailField("Email", [InputRequired()])
-    user_password = StringField("Password", [InputRequired()])
+    user_email = EmailField("Email", [InputRequired(message="Email field is required")])
+    user_password = StringField("Password", [InputRequired(message="Password field is required")])
